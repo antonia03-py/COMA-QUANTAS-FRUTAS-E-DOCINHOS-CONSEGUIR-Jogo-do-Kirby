@@ -1,0 +1,284 @@
+#pgzero
+import random
+
+WIDTH = 800
+HEIGHT = 600
+
+TITLE = "COMA QUANTAS FRUTAS E DOCINHOS CONSEGUIR!!!(づ｡◕‿‿◕｡)づ"
+
+#VIDE E SCORE
+score = 0
+lives = 3
+hearts = []
+for i in range(lives):
+    heart = Actor("heart")
+    heart.pos = (715 + i * 30, 20)
+    hearts.append(heart)
+    
+FPS = 60 + score / 5
+
+#MODE
+mode = "menu"
+
+#GAME OVER AHAHAHHA
+game_over = False
+
+#Fundo
+bg = Actor("CeuAzul")
+
+#Botão PLAY
+play_button = Actor("start2")
+play_button.pos = (400, 300)
+
+stars = []
+for i in range(20):
+    x = random.randint(0, 800)
+    y = random.randint(-450, -50)
+    star = Actor("star3", (x, y))
+    star.speed = random.randint(2, 15)
+    star.rotation_speed = random.randint(2, 8)  
+    stars.append(star)
+
+def staries():
+    for star in stars:
+        star.y += star.speed
+        star.angle += star.rotation_speed
+        if star.y > 580:
+            star.x = random.randint(0, 800)
+            star.y = -20
+            star.speed = random.randint(2, 15)
+            star.rotation_speed = random.randint(2, 8)
+            star.angle = 0
+
+def score_ao_comer(pp, comida, score, score_impact):
+    comida.y += 4 + score / 5 # OU cherry.y = cherry.y + 4
+    #LOOP
+    if comida.y > 600:
+        comida.x = random.randint(20, 780)
+        comida.y = 0
+    #YUMMY COLISAO COM O PP
+    if comida.colliderect(pp):
+        #ADICIONAR SOM
+        comida.x = random.randint(20, 780)
+        comida.y = 0
+        score += score_impact
+    
+    return score
+
+#Personagem Principal
+pp = Actor("kirbyparados")
+pp.x = 400
+pp.y = 560
+
+kirby_left = ["kirbyl1s", "kirbyl2s", "kirbyl3s", "kirbyl4s"]
+kirby_right = ["kirbyr1s", "kirbyr2s", "kirbyr3s", "kirbyr4s"]
+frame = 0
+
+for kirb_img in kirby_left:
+    pp.image = kirb_img
+        
+    for kirb_img in kirby_right:
+        pp.image = kirb_img
+
+    pp.image = "kirbyparados"
+
+
+#FRUTINHAAAAAS E BOLINHOOOOOOOOS :P
+cherry = Actor("cherry64")
+cherry.x = random.randint(20, 780)
+cherry.y = 0 
+
+blub = Actor("bluberry4")
+blub.x = random.randint(20, 780)
+blub.y = 0 
+
+bolo = Actor("bolo")
+bolo.x = random.randint(20, 780)
+bolo.y = 0 
+
+donut = Actor("donut3")
+donut.x = random.randint(20, 780)
+donut.y = 0 
+
+#BOOM!!!
+bomb = Actor("bomb")
+bomb.x = random.randint(20, 780)
+bomb.y = 0 
+
+bomb2 = Actor("bomb2")
+bomb2.x = random.randint(20, 780)
+bomb2.y = 0
+
+#SAPOOO
+sapo = Actor("alienfrontleft")
+sapo.x = random.randint(20, 780)
+sapo.y = 0
+
+#RESET
+def reset_game():
+    global score, lives, hearts, game_over, mode
+
+    score = 0
+    lives = 3
+    game_over = False
+    mode = "game"
+    
+    hearts = []
+    for i in range(lives):
+        heart = Actor("heart")
+        heart.pos = (715 + i * 30, 20)
+        hearts.append(heart)
+
+    
+    pp.x = 400
+    pp.y = 560
+
+    cherry.x = random.randint(20, 780)
+    cherry.y = 0
+
+    blub.x = random.randint(20, 780)
+    blub.y = 0
+
+    bolo.x = random.randint(20, 780)
+    bolo.y = 0
+
+    donut.x = random.randint(20, 780)
+    donut.y = 0
+    
+    bomb.x = random.randint(20, 780)
+    bomb.y = 0
+
+    bomb2.x = random.randint(20, 780)
+    bomb2.y = 0
+
+    sapo.x = random.randint(20, 780)
+    sapo.y = 0
+    
+#Movimentos
+def update(dt):
+    global score, lives, game_over, mode, frame
+
+    if mode == "menu":
+        staries()
+        return
+        
+    if mode != "game":
+        return
+
+    #PP
+    #DIREITA E ESQUERDA
+    if keyboard.right:
+        pp.x += 5
+        frame += 0.2   # controla a velocidade da animação
+        if frame >= len(kirby_right):
+            frame = 0
+        pp.image = kirby_right[int(frame)]
+
+    elif keyboard.left:
+        pp.x -= 5
+        frame += 0.2
+        if frame >= len(kirby_left):
+            frame = 0
+        pp.image = kirby_left[int(frame)]
+
+    else:
+        pp.image = "kirbyparados"
+        frame = 0
+
+    #PAREEEEEEE
+    if pp.x < 60:
+        pp.x = 60
+    if pp.x > 740:
+        pp.x = 740
+
+    ###FRUTA E BOLO###
+    #CAINDO
+    ##CHERRY##
+    score = score_ao_comer(pp, cherry, score, 1)
+
+    score = score_ao_comer(pp, blub, score, 1)
+
+    score = score_ao_comer(pp, bolo, score, 1)
+
+    score = score_ao_comer(pp, donut, score, 1)
+
+    score = score_ao_comer(pp, sapo, score, -3)
+    
+    #BOOOOOM!!!!!
+    bomb.y += 5 + score / 5 
+    if bomb.y > 600:
+        bomb.x = random.randint(20, 780)
+        bomb.y = 0
+    #KABOOM
+    if bomb.colliderect(pp):
+        #ADICIONAR SOM
+        bomb.x = random.randint(20, 780)
+        bomb.y = 0
+        if hearts:
+            hearts.pop() 
+            lives -= 1
+
+    #BOOOOOM!!!!!
+    bomb2.y += 5 + score / 5 
+    if bomb2.y > 600:
+        bomb2.x = random.randint(20, 780)
+        bomb2.y = 0
+    #KABOOM
+    if bomb2.colliderect(pp):
+        #ADICIONAR SOM
+        bomb2.x = random.randint(20, 780)
+        bomb2.y = 0
+        if hearts:
+            hearts.pop() 
+            lives -= 1
+            
+    #GAME OVER
+    if lives == 0:
+        mode = "game_over"
+        cherry.y = 0
+        blub.y = 0
+        bolo.y = 0
+        donut.y = 0
+        bomb.y = 0
+        bomb2.y = 0
+        sapo.y = 0
+         
+def draw():
+    bg.draw()
+
+    if mode == "menu":
+        play_button.draw()
+        for i in range(len(stars)):
+            stars[i].draw()
+        
+        
+    elif mode == "game_over":
+        screen.draw.text("GAME OVER", center =(404, 270), color ="#ffffff", fontsize = 70)
+        screen.draw.text("FINAL SCORE: " + str(score), center =(406, 325), color ="#ffffff", fontsize = 40)
+        screen.draw.text("Aperte R para recomeçar", center =(405, 460), color ="#ffffff", fontsize = 30)
+
+    elif mode == "game":
+        pp.draw()
+        cherry.draw()
+        bomb.draw()
+        bomb2.draw()
+        blub.draw()
+        bolo.draw()
+        donut.draw()
+        sapo.draw()
+        screen.draw.text("Score: " + str(score), center =(60, 12), color ="#ffffff", fontsize = 30)
+        screen.draw.text("Lives: ", center =(660, 12), color ="#ffffff", fontsize = 30)
+        for heart in hearts:
+            heart.draw()
+
+def on_mouse_down(button, pos):
+    global mode
+
+    if button == mouse.LEFT:
+        if mode == "menu" and play_button.collidepoint(pos):
+            mode = "game"
+            
+def on_key_down(key):
+    global mode
+    if key == keys.R and mode == "game_over":
+        reset_game()
